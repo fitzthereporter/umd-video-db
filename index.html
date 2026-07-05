@@ -2,11 +2,72 @@
 <html>
 <head>
   <title>UMD Database</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 900px; margin: 40px auto; padding: 0 20px; }
+    h1 { text-align: center; }
+    #controls { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; align-items: center; }
+    #searchInput { flex: 1 1 100%; padding: 8px; font-size: 16px; }
+    select { padding: 6px; }
+    .view-toggle button { padding: 6px 12px; cursor: pointer; }
+    .view-toggle button.active { background: #333; color: white; }
+    label.owned-check { display: flex; align-items: center; gap: 4px; }
+
+    /* List view */
+    .list-view { display: block; }
+    .list-view .movie-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid #ddd;
+      padding: 10px 0;
+    }
+    .list-view .cover { width: 50px; height: 70px; object-fit: cover; flex-shrink: 0; }
+    .list-view .cover-placeholder { display: flex; align-items: center; justify-content: center; font-size: 9px; text-align: center; background: #ddd; padding: 2px; }
+
+    /* Grid view */
+    .grid-view {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 20px;
+    }
+    .grid-view .movie-card { display: flex; flex-direction: column; }
+    .grid-view .cover { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; }
+    .grid-view .cover-placeholder { display: flex; align-items: center; justify-content: center; font-size: 12px; text-align: center; background: #ddd; padding: 8px; aspect-ratio: 2 / 3; }
+
+    .movie-card h3 { margin: 4px 0 2px 0; font-size: 15px; }
+    .movie-card p { margin: 0; color: #555; font-size: 13px; }
+    .owned-toggle { font-size: 13px; display: block; margin-top: 4px; }
+  </style>
 </head>
 <body>
   <h1>UMD Database</h1>
 
-  <p>Open the browser console to see if app.js is working.</p>
+  <div id="controls">
+    <input type="text" id="searchInput" placeholder="Search by title...">
+    <select id="yearFilter">
+      <option value="all">All Years</option>
+    </select>
+    <select id="studioFilter">
+      <option value="all">All Studios</option>
+    </select>
+    <select id="genreFilter">
+      <option value="all">All Genres</option>
+    </select>
+    <select id="formatFilter">
+      <option value="all">All Formats</option>
+      <option value="Animation">Animation</option>
+      <option value="Live Action">Live Action</option>
+    </select>
+    <label class="owned-check">
+      <input type="checkbox" id="ownedFilter"> Show only what I own
+    </label>
+    <div class="view-toggle">
+      <button id="listViewBtn">List</button>
+      <button id="gridViewBtn">Grid</button>
+    </div>
+  </div>
+
+  <div id="results"></div>
 
   <script src="app.js"></script>
 </body>
