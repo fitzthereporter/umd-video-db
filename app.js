@@ -1,6 +1,10 @@
 console.log("UMD Database app loaded");
 
-// Starter dataset — add a real image URL to "cover" whenever you have one.
+// Paste your free TMDB API key here (get one at https://www.themoviedb.org/settings/api)
+const TMDB_API_KEY = "bc3063428217fda0a6640d1850534411";
+const TMDB_IMG_BASE = "https://image.tmdb.org/t/p/w200";
+
+// Starter dataset — add a real image URL to "cover" to override auto-fetched art.
 const movies = [
   { title: "50 First Dates", year: 2004, genre: "Comedy", format: "Live Action", studio: "Sony Pictures", rating: "PG-13", cover: "" },
   { title: "American Pie", year: 1999, genre: "Comedy", format: "Live Action", studio: "Universal", rating: "NR", cover: "" },
@@ -69,6 +73,7 @@ const movies = [
 var OWNED_KEY = "umdOwnedCollection";
 var WATCHED_KEY = "umdWatchedCollection";
 var VIEW_KEY = "umdViewMode";
+var COVER_CACHE_KEY = "umdCoverCache";
 
 function movieId(m) {
   return m.title + "-" + m.year;
@@ -92,6 +97,47 @@ function toggleInSet(storageKey, id) {
   }
   saveSet(storageKey, set);
   applyFilters();
+}
+
+function getCoverCache() {
+  var raw = localStorage.getItem(COVER_CACHE_KEY);
+  return raw ? JSON.parse(raw) : {};
+}
+
+function saveCoverCache(cache) {
+  localStorage.setItem(COVER_CACHE_KEY, JSON.stringify(cache));
+}
+
+function fetchCoverFromTMDB(movie) {
+  var cache = getCoverCache();
+  var id = movieId(movie);
+
+  if (Object.prototype.hasOwnProperty.call(cache, id)) {
+    return Promise.resolve(cache[id]);
+  }
+  if (!TMDB_API_KEY) {
+    return Promise.resolve(null);
+  }
+
+  var url = "https://api.themoviedb.org/3/search/movie?api_key=" + encodeURIComponent(TMDB_API_KEY) +
+    "&query=" + encodeURIComponent(movie.title) + "&year=" + movie.year;
+
+  return fetch(url)
+    .then(function (res) { return res.json(); })
+    .then(function (data) {
+      var posterPath = data.results && data.results[0] && data.results[0].poster_path;
+      var coverUrl = posterPath ? TMDB_IMG_BASE + posterPath : null;
+      cache[id] = coverUrl;
+      saveCoverCache(cache);
+      return coverUrl;
+    })
+    .catch(function () {
+      return null;
+    });
+}
+
+function imdbSearchUrl(movie) {
+  return "https://www.imdb.com/find/?q=" + encodeURIComponent(movie.title + " " + movie.year) + "&s=tt&ttype=ft";
 }
 
 function getUnique(key) {
@@ -127,6 +173,26 @@ function populateFilters() {
   });
 }
 
+function buildCardHtml(movie, isOwned, isWatched) {
+  var id = movieId(movie);
+  var coverHtml = movie.cover
+    ? '<img class="cover" data-cover-id="' + id + '" src="' + movie.cover + '" alt="' + movie.title + ' cover">'
+    : '<div class="cover cover-placeholder" data-cover-id="' + id + '">' + movie.title + "</div>";
+
+  return (
+    coverHtml +
+    '<div class="movie-info">' +
+    "<h3>" + movie.title + " (" + movie.year + ")</h3>" +
+    "<p>" + movie.genre + " &middot; " + movie.format + " &middot; " + movie.studio + " &middot; Rated " + movie.rating + "</p>" +
+    '<div class="checks-row">' +
+    '<label class="check-toggle"><input type="checkbox" class="owned-checkbox" data-id="' + id + '"' + (isOwned ? " checked" : "") + "> Owned</label>" +
+    '<label class="check-toggle"><input type="checkbox" class="watched-checkbox" data-id="' + id + '"' + (isWatched ? " checked" : "") + "> Watched</label>" +
+    "</div>" +
+    '<a class="imdb-btn" href="' + imdbSearchUrl(movie) + '" target="_blank" rel="noopener">IMDb Entry</a>' +
+    "</div>"
+  );
+}
+
 function renderMovies(list, heading) {
   var container = document.getElementById("results");
   container.innerHTML = "";
@@ -144,31 +210,9 @@ function renderMovies(list, heading) {
 
   list.forEach(function (movie) {
     var id = movieId(movie);
-    var isOwned = owned.has(id);
-    var isWatched = watched.has(id);
-
     var card = document.createElement("div");
     card.className = "movie-card";
-
-    var coverHtml;
-    if (movie.cover) {
-      coverHtml = '<img class="cover" src="' + movie.cover + '" alt="' + movie.title + ' cover">';
-    } else {
-      coverHtml = '<div class="cover cover-placeholder">' + movie.title + "</div>";
-    }
-
-    card.innerHTML =
-      coverHtml +
-      '<div class="movie-info">' +
-      "<h3>" + movie.title + " (" + movie.year + ")</h3>" +
-      "<p>" + movie.genre + " &middot; " + movie.format + " &middot; " + movie.studio + " &middot; Rated " + movie.rating + "</p>" +
-      '<label class="check-toggle">' +
-      '<input type="checkbox" class="owned-checkbox" data-id="' + id + '"' + (isOwned ? " checked" : "") + ">" +
-      " Owned</label>" +
-      '<label class="check-toggle">' +
-      '<input type="checkbox" class="watched-checkbox" data-id="' + id + '"' + (isWatched ? " checked" : "") + ">" +
-      " Watched</label>" +
-      "</div>";
+    card.innerHTML = buildCardHtml(movie, owned.has(id), watched.has(id));
 
     card.querySelector(".owned-checkbox").addEventListener("change", function () {
       toggleInSet(OWNED_KEY, id);
@@ -178,6 +222,20 @@ function renderMovies(list, heading) {
     });
 
     container.appendChild(card);
+
+    if (!movie.cover) {
+      fetchCoverFromTMDB(movie).then(function (coverUrl) {
+        if (!coverUrl) return;
+        var el = card.querySelector('[data-cover-id="' + id + '"]');
+        if (!el) return;
+        var img = document.createElement("img");
+        img.className = "cover";
+        img.setAttribute("data-cover-id", id);
+        img.src = coverUrl;
+        img.alt = movie.title + " cover";
+        el.replaceWith(img);
+      });
+    }
   });
 }
 
