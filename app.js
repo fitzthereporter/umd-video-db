@@ -598,7 +598,7 @@ var OWNED_KEY = "umdOwnedCollection";
 var WATCHED_KEY = "umdWatchedCollection";
 var WISHLIST_KEY = "umdWishlistCollection";
 var VIEW_KEY = "umdViewMode";
-var COVER_CACHE_KEY = "umdCoverCache";
+var COVER_CACHE_KEY = "umdCoverCacheV3";
 
 function movieId(m) {
   return m.title + "-" + m.year;
@@ -633,6 +633,17 @@ function saveCoverCache(cache) {
   localStorage.setItem(COVER_CACHE_KEY, JSON.stringify(cache));
 }
 
+function simplifyShowTitle(title) {
+  var splitIndex = title.search(/[:,]/);
+  if (splitIndex === -1) return null;
+  var base = title.slice(0, splitIndex).trim();
+  var rest = title.slice(splitIndex + 1);
+  if (/vol|volume|season|disc|part|episode|\d/i.test(rest)) {
+    return base;
+  }
+  return null;
+}
+
 function fetchCoverFromTMDB(movie) {
   var cache = getCoverCache();
   var id = movieId(movie);
@@ -644,13 +655,41 @@ function fetchCoverFromTMDB(movie) {
     return Promise.resolve(null);
   }
 
-  var url = "https://api.themoviedb.org/3/search/movie?api_key=" + encodeURIComponent(TMDB_API_KEY) +
-    "&query=" + encodeURIComponent(movie.title) + "&year=" + movie.year;
+  function searchMovieByTitle(title, withYear) {
+    var url = "https://api.themoviedb.org/3/search/movie?api_key=" + encodeURIComponent(TMDB_API_KEY) +
+      "&query=" + encodeURIComponent(title) + (withYear ? "&year=" + movie.year : "");
+    return fetch(url).then(function (res) { return res.json(); }).then(function (data) {
+      return data.results && data.results[0] && data.results[0].poster_path;
+    });
+  }
 
-  return fetch(url)
-    .then(function (res) { return res.json(); })
-    .then(function (data) {
-      var posterPath = data.results && data.results[0] && data.results[0].poster_path;
+  function searchTVByTitle(title) {
+    var url = "https://api.themoviedb.org/3/search/tv?api_key=" + encodeURIComponent(TMDB_API_KEY) +
+      "&query=" + encodeURIComponent(title);
+    return fetch(url).then(function (res) { return res.json(); }).then(function (data) {
+      return data.results && data.results[0] && data.results[0].poster_path;
+    });
+  }
+
+  var simplified = simplifyShowTitle(movie.title);
+
+  // Only Movie/Stand-up/TV categories have any chance of a poster on TMDB.
+  // Concert/Music and Sports content isn't catalogued there at all.
+  var attempt;
+  if (movie.category === "TV") {
+    attempt = searchTVByTitle(movie.title)
+      .then(function (p) { return p || searchMovieByTitle(movie.title, true); })
+      .then(function (p) { return p || searchMovieByTitle(movie.title, false); })
+      .then(function (p) { return p || (simplified ? searchTVByTitle(simplified) : null); })
+      .then(function (p) { return p || (simplified ? searchMovieByTitle(simplified, false) : null); });
+  } else if (movie.category === "Concert/Music" || movie.category === "Sports") {
+    attempt = Promise.resolve(null);
+  } else {
+    attempt = searchMovieByTitle(movie.title, true).then(function (p) { return p || searchMovieByTitle(movie.title, false); });
+  }
+
+  return attempt
+    .then(function (posterPath) {
       var coverUrl = posterPath ? TMDB_IMG_BASE + posterPath : null;
       cache[id] = coverUrl;
       saveCoverCache(cache);
@@ -710,11 +749,19 @@ function populateFilters() {
   });
 }
 
+function placeholderClass(movie) {
+  if (movie.category === "Sports") {
+    return /wwe|wrestl/i.test(movie.title) ? "placeholder-wrestling" : "placeholder-sports";
+  }
+  if (movie.category === "Concert/Music") return "placeholder-music";
+  return "placeholder-default";
+}
+
 function buildCardHtml(movie, isOwned, isWatched, isWishlist) {
   var id = movieId(movie);
   var coverHtml = movie.cover
     ? '<img class="cover" data-cover-id="' + id + '" src="' + movie.cover + '" alt="' + movie.title + ' cover">'
-    : '<div class="cover cover-placeholder" data-cover-id="' + id + '">' + movie.title + "</div>";
+    : '<div class="cover cover-placeholder ' + placeholderClass(movie) + '" data-cover-id="' + id + '">' + movie.title + "</div>";
 
   var imdbHtml = hasImdbEntry(movie)
     ? '<a class="imdb-btn" href="' + imdbSearchUrl(movie) + '" target="_blank" rel="noopener">IMDb Entry</a>'
@@ -817,7 +864,7 @@ function isDefaultState() {
 
 function applyFilters() {
   if (isDefaultState()) {
-    renderMovies(getRandomPicks(8), "Random Picks — search or filter to browse everything");
+    renderMovies(getRandomPicks(10), "Showing 10 random picks out of " + movies.length + " total — search or filter to browse everything");
     return;
   }
 
@@ -878,10 +925,10 @@ function setView(mode) {
 document.addEventListener("DOMContentLoaded", function () {
   populateFilters();
 
-  var savedView = localStorage.getItem(VIEW_KEY) || "list";
+  var savedView = localStorage.getItem(VIEW_KEY) || "grid";
   setView(savedView);
 
-  renderMovies(getRandomPicks(8), "Random Picks — search or filter to browse everything");
+  renderMovies(getRandomPicks(10), "Showing 10 random picks out of " + movies.length + " total — search or filter to browse everything");
 
   document.getElementById("searchInput").addEventListener("input", applyFilters);
   document.getElementById("categoryFilter").addEventListener("change", applyFilters);

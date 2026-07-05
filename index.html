@@ -98,11 +98,12 @@
     #showAllBtn:hover { border-color: #58a6ff; }
 
     #resultsHeading {
-      color: #7fa8e0;
-      font-size: 12px;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      margin: 6px 4px 14px;
+      color: #cfe0ff;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      margin: 0 4px 16px;
+      padding-top: 2px;
     }
 
     .empty-message { color: #7fa8e0; text-align: center; margin-top: 30px; }
@@ -135,24 +136,54 @@
     .list-view .cover-placeholder {
       display: flex; align-items: center; justify-content: center;
       font-size: 8px; text-align: center; padding: 2px;
-      background: rgba(120, 180, 255, 0.15); color: #9fb8e0;
       border-radius: 4px;
     }
 
     /* Grid view */
     .grid-view {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-      gap: 18px;
+      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      gap: 24px;
     }
-    .grid-view .movie-card { display: flex; flex-direction: column; padding: 10px; }
-    .grid-view .cover { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 6px; }
+    .grid-view .movie-card {
+      display: flex;
+      flex-direction: column;
+      padding: 12px;
+      height: 100%;
+    }
+    .grid-view .cover {
+      width: 100%;
+      aspect-ratio: 2 / 3;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
     .grid-view .cover-placeholder {
       display: flex; align-items: center; justify-content: center;
-      font-size: 12px; text-align: center; padding: 8px; aspect-ratio: 2 / 3;
-      background: rgba(120, 180, 255, 0.15); color: #9fb8e0;
-      border-radius: 6px;
+      font-size: 13px; text-align: center; padding: 10px; aspect-ratio: 2 / 3;
+      border-radius: 8px; margin-bottom: 10px;
     }
+    .grid-view .movie-info {
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+    .grid-view .movie-card h3 {
+      font-size: 14px;
+      line-height: 1.3;
+    }
+    .grid-view .checks-row {
+      margin-top: auto;
+      padding-top: 8px;
+    }
+    .grid-view .imdb-btn {
+      align-self: flex-start;
+    }
+
+    .placeholder-default { background: rgba(120, 180, 255, 0.2); color: #cfe0ff; }
+    .placeholder-sports { background: rgba(60, 200, 130, 0.2); color: #a8f0cf; }
+    .placeholder-wrestling { background: rgba(230, 200, 40, 0.22); color: #ffe98a; }
+    .placeholder-music { background: rgba(220, 60, 190, 0.2); color: #ffb3ef; }
   </style>
 </head>
 <body>
