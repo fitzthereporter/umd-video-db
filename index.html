@@ -87,15 +87,16 @@
       box-shadow: 0 0 10px rgba(88, 166, 255, 0.7);
     }
 
-    #showAllBtn, #exportWishlistBtn {
+    #showAllBtn, #exportWishlistBtn, .file-btn {
       padding: 7px 16px;
       cursor: pointer;
       border-radius: 16px;
       border: 1px solid rgba(120, 180, 255, 0.4);
       background: rgba(0, 10, 30, 0.6);
       color: #cfe0ff;
+      display: inline-block;
     }
-    #showAllBtn:hover, #exportWishlistBtn:hover { border-color: #58a6ff; }
+    #showAllBtn:hover, #exportWishlistBtn:hover, .file-btn:hover { border-color: #58a6ff; }
 
     #resultsHeading {
       color: #cfe0ff;
@@ -294,7 +295,9 @@
       <input type="checkbox" id="wishlistFilter"> Wishlist only
     </label>
     <button id="showAllBtn">Show All</button>
-    <button id="exportWishlistBtn">Export Wishlist</button>
+    <button id="exportWishlistBtn">Export Collection</button>
+    <label class="file-btn" for="importWishlistInput">Import Collection</label>
+    <input type="file" id="importWishlistInput" accept=".csv" style="display: none;">
     <div class="view-toggle">
       <button id="listViewBtn">List</button>
       <button id="gridViewBtn">Grid</button>

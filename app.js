@@ -1011,22 +1011,35 @@ function csvEscape(value) {
   return str;
 }
 
-function exportWishlist() {
+function exportCollection() {
+  var owned = getSet(OWNED_KEY);
+  var watched = getSet(WATCHED_KEY);
   var wishlist = getSet(WISHLIST_KEY);
-  var wishlistMovies = movies.filter(function (m) { return wishlist.has(movieId(m)); });
 
-  if (wishlistMovies.length === 0) {
-    alert("Your wishlist is empty — check a few \"Wishlist\" boxes first, then export.");
+  var trackedMovies = movies.filter(function (m) {
+    var id = movieId(m);
+    return owned.has(id) || watched.has(id) || wishlist.has(id);
+  });
+
+  if (trackedMovies.length === 0) {
+    alert("Nothing to export yet — check a few Owned, Watched, or Wishlist circles first.");
     return;
   }
 
-  wishlistMovies.sort(function (a, b) { return a.title.localeCompare(b.title); });
+  trackedMovies.sort(function (a, b) { return a.title.localeCompare(b.title); });
 
-  var header = ["Title", "Year", "Category", "Genre", "Format", "Studio", "Rating", "eBay Search Link"];
+  var header = ["Title", "Year", "Category", "Genre", "Format", "Studio", "Rating", "Owned", "Watched", "Wishlist", "eBay Search Link"];
   var rows = [header];
 
-  wishlistMovies.forEach(function (m) {
-    rows.push([m.title, m.year, m.category, m.genre, m.format, m.studio, m.rating, ebaySearchUrl(m)]);
+  trackedMovies.forEach(function (m) {
+    var id = movieId(m);
+    rows.push([
+      m.title, m.year, m.category, m.genre, m.format, m.studio, m.rating,
+      owned.has(id) ? "Yes" : "No",
+      watched.has(id) ? "Yes" : "No",
+      wishlist.has(id) ? "Yes" : "No",
+      ebaySearchUrl(m)
+    ]);
   });
 
   var csvContent = rows.map(function (row) {
@@ -1037,11 +1050,113 @@ function exportWishlist() {
   var url = URL.createObjectURL(blob);
   var link = document.createElement("a");
   link.href = url;
-  link.download = "umd-wishlist.csv";
+  link.download = "umd-collection.csv";
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
+}
+
+function parseCSV(text) {
+  var lines = text.split(/\r\n|\n/).filter(function (l) { return l.trim() !== ""; });
+  return lines.map(function (line) {
+    var result = [];
+    var cur = "";
+    var inQuotes = false;
+    for (var i = 0; i < line.length; i++) {
+      var ch = line[i];
+      if (inQuotes) {
+        if (ch === '"') {
+          if (line[i + 1] === '"') { cur += '"'; i++; }
+          else { inQuotes = false; }
+        } else {
+          cur += ch;
+        }
+      } else {
+        if (ch === '"') { inQuotes = true; }
+        else if (ch === ",") { result.push(cur); cur = ""; }
+        else { cur += ch; }
+      }
+    }
+    result.push(cur);
+    return result;
+  });
+}
+
+function importCollectionFromCSV(file) {
+  var reader = new FileReader();
+  reader.onload = function (e) {
+    try {
+      var rows = parseCSV(e.target.result);
+      if (rows.length < 2) {
+        alert("That file doesn't look like a collection export — no rows found.");
+        return;
+      }
+
+      var header = rows[0].map(function (h) { return h.trim().toLowerCase(); });
+      var titleIdx = header.indexOf("title");
+      var yearIdx = header.indexOf("year");
+      var ownedIdx = header.indexOf("owned");
+      var watchedIdx = header.indexOf("watched");
+      var wishlistIdx = header.indexOf("wishlist");
+
+      if (titleIdx === -1 || yearIdx === -1) {
+        alert("Couldn't find \"Title\" and \"Year\" columns in that file. Make sure you're uploading a CSV exported from this app.");
+        return;
+      }
+
+      function isTrue(val) {
+        if (!val) return false;
+        var v = val.trim().toLowerCase();
+        return v === "yes" || v === "true" || v === "1";
+      }
+
+      var owned = getSet(OWNED_KEY);
+      var watched = getSet(WATCHED_KEY);
+      var wishlist = getSet(WISHLIST_KEY);
+      var matchedCount = 0;
+      var notFound = [];
+
+      for (var i = 1; i < rows.length; i++) {
+        var row = rows[i];
+        if (!row[titleIdx]) continue;
+        var title = row[titleIdx].trim();
+        var year = row[yearIdx] ? row[yearIdx].trim() : "";
+
+        var match = movies.filter(function (m) {
+          return m.title === title && String(m.year) === String(year);
+        })[0];
+        if (!match) {
+          match = movies.filter(function (m) { return m.title === title; })[0];
+        }
+
+        if (match) {
+          var id = movieId(match);
+          if (ownedIdx !== -1 && isTrue(row[ownedIdx])) owned.add(id);
+          if (watchedIdx !== -1 && isTrue(row[watchedIdx])) watched.add(id);
+          if (wishlistIdx !== -1 && isTrue(row[wishlistIdx])) wishlist.add(id);
+          matchedCount++;
+        } else {
+          notFound.push(title);
+        }
+      }
+
+      saveSet(OWNED_KEY, owned);
+      saveSet(WATCHED_KEY, watched);
+      saveSet(WISHLIST_KEY, wishlist);
+      applyFilters();
+
+      var message = "Imported status for " + matchedCount + " title" + (matchedCount === 1 ? "" : "s") + ".";
+      if (notFound.length > 0) {
+        message += "\n\n" + notFound.length + " title(s) in the file weren't found in this database:\n" +
+          notFound.slice(0, 10).join(", ") + (notFound.length > 10 ? ", ..." : "");
+      }
+      alert(message);
+    } catch (err) {
+      alert("There was a problem reading that file. Make sure it's a CSV exported from this app's \"Export Collection\" button.");
+    }
+  };
+  reader.readAsText(file);
 }
 
 function setView(mode) {
@@ -1072,7 +1187,13 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("watchedFilter").addEventListener("change", applyFilters);
   document.getElementById("wishlistFilter").addEventListener("change", applyFilters);
   document.getElementById("showAllBtn").addEventListener("click", showAllMovies);
-  document.getElementById("exportWishlistBtn").addEventListener("click", exportWishlist);
+  document.getElementById("exportWishlistBtn").addEventListener("click", exportCollection);
+  document.getElementById("importWishlistInput").addEventListener("change", function (e) {
+    if (e.target.files && e.target.files[0]) {
+      importCollectionFromCSV(e.target.files[0]);
+      e.target.value = "";
+    }
+  });
   document.getElementById("listViewBtn").addEventListener("click", function () { setView("list"); });
   document.getElementById("gridViewBtn").addEventListener("click", function () { setView("grid"); });
 });
