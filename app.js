@@ -66,53 +66,215 @@ const movies = [
   { title: "xXx: State of the Union", year: 2005, genre: "Action", format: "Live Action", studio: "Sony Pictures", rating: "PG-13", cover: "" }
 ];
 
-// --- App logic below ---
-
-const OWNED_KEY = "umdOwnedCollection";
-const VIEW_KEY = "umdViewMode";
+var OWNED_KEY = "umdOwnedCollection";
+var WATCHED_KEY = "umdWatchedCollection";
+var VIEW_KEY = "umdViewMode";
 
 function movieId(m) {
-  return `${m.title}-${m.year}`;
+  return m.title + "-" + m.year;
 }
 
-function getOwnedSet() {
-  const raw = localStorage.getItem(OWNED_KEY);
+function getSet(storageKey) {
+  var raw = localStorage.getItem(storageKey);
   return new Set(raw ? JSON.parse(raw) : []);
 }
 
-function saveOwnedSet(set) {
-  localStorage.setItem(OWNED_KEY, JSON.stringify([...set]));
+function saveSet(storageKey, set) {
+  localStorage.setItem(storageKey, JSON.stringify(Array.from(set)));
 }
 
-function toggleOwned(id) {
-  const owned = getOwnedSet();
-  if (owned.has(id)) {
-    owned.delete(id);
+function toggleInSet(storageKey, id) {
+  var set = getSet(storageKey);
+  if (set.has(id)) {
+    set.delete(id);
   } else {
-    owned.add(id);
+    set.add(id);
   }
-  saveOwnedSet(owned);
+  saveSet(storageKey, set);
   applyFilters();
 }
 
 function getUnique(key) {
-  return [...new Set(movies.map(m => m[key]))].sort();
+  var values = movies.map(function (m) { return m[key]; });
+  return Array.from(new Set(values)).sort();
 }
 
 function populateFilters() {
-  const yearSelect = document.getElementById("yearFilter");
-  const studioSelect = document.getElementById("studioFilter");
-  const genreSelect = document.getElementById("genreFilter");
+  var yearSelect = document.getElementById("yearFilter");
+  var studioSelect = document.getElementById("studioFilter");
+  var genreSelect = document.getElementById("genreFilter");
 
-  getUnique("year").sort((a, b) => b - a).forEach(year => {
-    const opt = document.createElement("option");
+  var years = getUnique("year").sort(function (a, b) { return b - a; });
+  years.forEach(function (year) {
+    var opt = document.createElement("option");
     opt.value = year;
     opt.textContent = year;
     yearSelect.appendChild(opt);
   });
 
-  getUnique("studio").forEach(studio => {
-    const opt = document.createElement("option");
+  getUnique("studio").forEach(function (studio) {
+    var opt = document.createElement("option");
     opt.value = studio;
     opt.textContent = studio;
-    studioSelect.appendChild(o
+    studioSelect.appendChild(opt);
+  });
+
+  getUnique("genre").forEach(function (genre) {
+    var opt = document.createElement("option");
+    opt.value = genre;
+    opt.textContent = genre;
+    genreSelect.appendChild(opt);
+  });
+}
+
+function renderMovies(list, heading) {
+  var container = document.getElementById("results");
+  container.innerHTML = "";
+
+  var headingEl = document.getElementById("resultsHeading");
+  headingEl.textContent = heading || "";
+
+  if (list.length === 0) {
+    container.innerHTML = "<p class='empty-message'>No movies match your search.</p>";
+    return;
+  }
+
+  var owned = getSet(OWNED_KEY);
+  var watched = getSet(WATCHED_KEY);
+
+  list.forEach(function (movie) {
+    var id = movieId(movie);
+    var isOwned = owned.has(id);
+    var isWatched = watched.has(id);
+
+    var card = document.createElement("div");
+    card.className = "movie-card";
+
+    var coverHtml;
+    if (movie.cover) {
+      coverHtml = '<img class="cover" src="' + movie.cover + '" alt="' + movie.title + ' cover">';
+    } else {
+      coverHtml = '<div class="cover cover-placeholder">' + movie.title + "</div>";
+    }
+
+    card.innerHTML =
+      coverHtml +
+      '<div class="movie-info">' +
+      "<h3>" + movie.title + " (" + movie.year + ")</h3>" +
+      "<p>" + movie.genre + " &middot; " + movie.format + " &middot; " + movie.studio + " &middot; Rated " + movie.rating + "</p>" +
+      '<label class="check-toggle">' +
+      '<input type="checkbox" class="owned-checkbox" data-id="' + id + '"' + (isOwned ? " checked" : "") + ">" +
+      " Owned</label>" +
+      '<label class="check-toggle">' +
+      '<input type="checkbox" class="watched-checkbox" data-id="' + id + '"' + (isWatched ? " checked" : "") + ">" +
+      " Watched</label>" +
+      "</div>";
+
+    card.querySelector(".owned-checkbox").addEventListener("change", function () {
+      toggleInSet(OWNED_KEY, id);
+    });
+    card.querySelector(".watched-checkbox").addEventListener("change", function () {
+      toggleInSet(WATCHED_KEY, id);
+    });
+
+    container.appendChild(card);
+  });
+}
+
+function getRandomPicks(count) {
+  var shuffled = movies.slice().sort(function () { return Math.random() - 0.5; });
+  return shuffled.slice(0, count);
+}
+
+function isDefaultState() {
+  var searchTerm = document.getElementById("searchInput").value.trim();
+  var year = document.getElementById("yearFilter").value;
+  var studio = document.getElementById("studioFilter").value;
+  var genre = document.getElementById("genreFilter").value;
+  var format = document.getElementById("formatFilter").value;
+  var onlyOwned = document.getElementById("ownedFilter").checked;
+  var onlyWatched = document.getElementById("watchedFilter").checked;
+
+  return (
+    searchTerm === "" &&
+    year === "all" &&
+    studio === "all" &&
+    genre === "all" &&
+    format === "all" &&
+    !onlyOwned &&
+    !onlyWatched
+  );
+}
+
+function applyFilters() {
+  if (isDefaultState()) {
+    renderMovies(getRandomPicks(8), "Random Picks — search or filter to browse everything");
+    return;
+  }
+
+  var searchTerm = document.getElementById("searchInput").value.toLowerCase();
+  var year = document.getElementById("yearFilter").value;
+  var studio = document.getElementById("studioFilter").value;
+  var genre = document.getElementById("genreFilter").value;
+  var format = document.getElementById("formatFilter").value;
+  var onlyOwned = document.getElementById("ownedFilter").checked;
+  var onlyWatched = document.getElementById("watchedFilter").checked;
+  var owned = getSet(OWNED_KEY);
+  var watched = getSet(WATCHED_KEY);
+
+  var filtered = movies.filter(function (m) {
+    return (
+      m.title.toLowerCase().indexOf(searchTerm) !== -1 &&
+      (year === "all" || String(m.year) === year) &&
+      (studio === "all" || m.studio === studio) &&
+      (genre === "all" || m.genre === genre) &&
+      (format === "all" || m.format === format) &&
+      (!onlyOwned || owned.has(movieId(m))) &&
+      (!onlyWatched || watched.has(movieId(m)))
+    );
+  });
+
+  renderMovies(filtered, filtered.length + " result" + (filtered.length === 1 ? "" : "s"));
+}
+
+function showAllMovies() {
+  document.getElementById("searchInput").value = "";
+  document.getElementById("yearFilter").value = "all";
+  document.getElementById("studioFilter").value = "all";
+  document.getElementById("genreFilter").value = "all";
+  document.getElementById("formatFilter").value = "all";
+  document.getElementById("ownedFilter").checked = false;
+  document.getElementById("watchedFilter").checked = false;
+
+  var sorted = movies.slice().sort(function (a, b) { return a.title.localeCompare(b.title); });
+  renderMovies(sorted, "All " + sorted.length + " Movies");
+}
+
+function setView(mode) {
+  var container = document.getElementById("results");
+  container.classList.remove("list-view", "grid-view");
+  container.classList.add(mode === "grid" ? "grid-view" : "list-view");
+  localStorage.setItem(VIEW_KEY, mode);
+  document.getElementById("listViewBtn").classList.toggle("active", mode === "list");
+  document.getElementById("gridViewBtn").classList.toggle("active", mode === "grid");
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  populateFilters();
+
+  var savedView = localStorage.getItem(VIEW_KEY) || "list";
+  setView(savedView);
+
+  renderMovies(getRandomPicks(8), "Random Picks — search or filter to browse everything");
+
+  document.getElementById("searchInput").addEventListener("input", applyFilters);
+  document.getElementById("yearFilter").addEventListener("change", applyFilters);
+  document.getElementById("studioFilter").addEventListener("change", applyFilters);
+  document.getElementById("genreFilter").addEventListener("change", applyFilters);
+  document.getElementById("formatFilter").addEventListener("change", applyFilters);
+  document.getElementById("ownedFilter").addEventListener("change", applyFilters);
+  document.getElementById("watchedFilter").addEventListener("change", applyFilters);
+  document.getElementById("showAllBtn").addEventListener("click", showAllMovies);
+  document.getElementById("listViewBtn").addEventListener("click", function () { setView("list"); });
+  document.getElementById("gridViewBtn").addEventListener("click", function () { setView("grid"); });
+});
