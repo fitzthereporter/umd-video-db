@@ -3,44 +3,158 @@
 <head>
   <title>UMD Database</title>
   <style>
-    body { font-family: Arial, sans-serif; max-width: 900px; margin: 40px auto; padding: 0 20px; }
-    h1 { text-align: center; }
-    #controls { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; align-items: center; }
-    #searchInput { flex: 1 1 100%; padding: 8px; font-size: 16px; }
-    select { padding: 6px; }
-    .view-toggle button { padding: 6px 12px; cursor: pointer; }
-    .view-toggle button.active { background: #333; color: white; }
-    label.owned-check { display: flex; align-items: center; gap: 4px; }
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 30px 20px 60px;
+      background: linear-gradient(180deg, #050b1a 0%, #0a1a3c 45%, #0d2a5c 100%);
+      color: #e8f0ff;
+      min-height: 100vh;
+    }
+    h1 {
+      text-align: center;
+      font-weight: 300;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      font-size: 26px;
+      color: #ffffff;
+      text-shadow: 0 0 12px rgba(120, 180, 255, 0.7);
+      margin-bottom: 4px;
+    }
+    .subtitle {
+      text-align: center;
+      color: #7fa8e0;
+      font-size: 12px;
+      letter-spacing: 2px;
+      margin-bottom: 30px;
+      text-transform: uppercase;
+    }
+    #controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(120, 180, 255, 0.25);
+      border-radius: 12px;
+      padding: 14px;
+      backdrop-filter: blur(4px);
+    }
+    #searchInput {
+      flex: 1 1 100%;
+      padding: 10px 14px;
+      font-size: 15px;
+      border-radius: 20px;
+      border: 1px solid rgba(120, 180, 255, 0.4);
+      background: rgba(0, 10, 30, 0.6);
+      color: #e8f0ff;
+      outline: none;
+    }
+    #searchInput::placeholder { color: #6b89b8; }
+    #searchInput:focus { border-color: #58a6ff; box-shadow: 0 0 8px rgba(88, 166, 255, 0.6); }
 
-    /* List view */
+    select {
+      padding: 7px 10px;
+      border-radius: 16px;
+      border: 1px solid rgba(120, 180, 255, 0.4);
+      background: rgba(0, 10, 30, 0.6);
+      color: #e8f0ff;
+    }
+
+    label.check-inline {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 13px;
+      color: #cfe0ff;
+    }
+
+    .view-toggle button {
+      padding: 7px 16px;
+      cursor: pointer;
+      border-radius: 16px;
+      border: 1px solid rgba(120, 180, 255, 0.4);
+      background: rgba(0, 10, 30, 0.6);
+      color: #cfe0ff;
+    }
+    .view-toggle button.active {
+      background: linear-gradient(180deg, #4d90fe, #1a5fd0);
+      border-color: #58a6ff;
+      color: white;
+      box-shadow: 0 0 10px rgba(88, 166, 255, 0.7);
+    }
+
+    #showAllBtn {
+      padding: 7px 16px;
+      cursor: pointer;
+      border-radius: 16px;
+      border: 1px solid rgba(120, 180, 255, 0.4);
+      background: rgba(0, 10, 30, 0.6);
+      color: #cfe0ff;
+    }
+    #showAllBtn:hover { border-color: #58a6ff; }
+
+    #resultsHeading {
+      color: #7fa8e0;
+      font-size: 12px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin: 6px 4px 14px;
+    }
+
+    .empty-message { color: #7fa8e0; text-align: center; margin-top: 30px; }
+
+    .movie-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(120, 180, 255, 0.2);
+      border-radius: 10px;
+      transition: box-shadow 0.15s, border-color 0.15s;
+    }
+    .movie-card:hover {
+      border-color: #58a6ff;
+      box-shadow: 0 0 14px rgba(88, 166, 255, 0.4);
+    }
+    .movie-card h3 { margin: 4px 0 2px 0; font-size: 15px; color: #ffffff; }
+    .movie-card p { margin: 0; color: #9fb8e0; font-size: 12px; }
+    .check-toggle { font-size: 12px; display: inline-flex; align-items: center; gap: 4px; margin-top: 6px; margin-right: 12px; color: #cfe0ff; }
+
     .list-view { display: block; }
     .list-view .movie-card {
       display: flex;
       align-items: center;
-      gap: 12px;
-      border-bottom: 1px solid #ddd;
-      padding: 10px 0;
+      gap: 14px;
+      padding: 10px 14px;
+      margin-bottom: 8px;
     }
-    .list-view .cover { width: 50px; height: 70px; object-fit: cover; flex-shrink: 0; }
-    .list-view .cover-placeholder { display: flex; align-items: center; justify-content: center; font-size: 9px; text-align: center; background: #ddd; padding: 2px; }
+    .list-view .cover { width: 46px; height: 64px; object-fit: cover; border-radius: 4px; flex-shrink: 0; }
+    .list-view .cover-placeholder {
+      display: flex; align-items: center; justify-content: center;
+      font-size: 8px; text-align: center; padding: 2px;
+      background: rgba(120, 180, 255, 0.15); color: #9fb8e0;
+      border-radius: 4px;
+    }
 
-    /* Grid view */
     .grid-view {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-      gap: 20px;
+      gap: 18px;
     }
-    .grid-view .movie-card { display: flex; flex-direction: column; }
-    .grid-view .cover { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; }
-    .grid-view .cover-placeholder { display: flex; align-items: center; justify-content: center; font-size: 12px; text-align: center; background: #ddd; padding: 8px; aspect-ratio: 2 / 3; }
-
-    .movie-card h3 { margin: 4px 0 2px 0; font-size: 15px; }
-    .movie-card p { margin: 0; color: #555; font-size: 13px; }
-    .owned-toggle { font-size: 13px; display: block; margin-top: 4px; }
+    .grid-view .movie-card { display: flex; flex-direction: column; padding: 10px; }
+    .grid-view .cover { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 6px; }
+    .grid-view .cover-placeholder {
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; text-align: center; padding: 8px; aspect-ratio: 2 / 3;
+      background: rgba(120, 180, 255, 0.15); color: #9fb8e0;
+      border-radius: 6px;
+    }
   </style>
 </head>
 <body>
   <h1>UMD Database</h1>
+  <div class="subtitle">Personal Collection</div>
 
   <div id="controls">
     <input type="text" id="searchInput" placeholder="Search by title...">
@@ -58,15 +172,20 @@
       <option value="Animation">Animation</option>
       <option value="Live Action">Live Action</option>
     </select>
-    <label class="owned-check">
-      <input type="checkbox" id="ownedFilter"> Show only what I own
+    <label class="check-inline">
+      <input type="checkbox" id="ownedFilter"> Owned only
     </label>
+    <label class="check-inline">
+      <input type="checkbox" id="watchedFilter"> Watched only
+    </label>
+    <button id="showAllBtn">Show All</button>
     <div class="view-toggle">
       <button id="listViewBtn">List</button>
       <button id="gridViewBtn">Grid</button>
     </div>
   </div>
 
+  <div id="resultsHeading"></div>
   <div id="results"></div>
 
   <script src="app.js"></script>
