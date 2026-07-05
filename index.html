@@ -87,7 +87,7 @@
       box-shadow: 0 0 10px rgba(88, 166, 255, 0.7);
     }
 
-    #showAllBtn {
+    #showAllBtn, #exportWishlistBtn {
       padding: 7px 16px;
       cursor: pointer;
       border-radius: 16px;
@@ -95,7 +95,7 @@
       background: rgba(0, 10, 30, 0.6);
       color: #cfe0ff;
     }
-    #showAllBtn:hover { border-color: #58a6ff; }
+    #showAllBtn:hover, #exportWishlistBtn:hover { border-color: #58a6ff; }
 
     #resultsHeading {
       color: #cfe0ff;
@@ -121,7 +121,46 @@
     }
     .movie-card h3 { margin: 4px 0 2px 0; font-size: 15px; color: #ffffff; }
     .movie-card p { margin: 0; color: #9fb8e0; font-size: 12px; }
-    .check-toggle { font-size: 12px; display: inline-flex; align-items: center; gap: 4px; margin-top: 6px; margin-right: 12px; color: #cfe0ff; }
+    .toggle-item {
+      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 6px;
+      margin-right: 14px;
+      color: #9fb8e0;
+      cursor: pointer;
+      user-select: none;
+    }
+    .toggle-item input[type="checkbox"] {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .toggle-circle {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      border: 2px solid rgba(120, 180, 255, 0.4);
+      background: rgba(0, 10, 30, 0.5);
+      display: inline-block;
+      flex-shrink: 0;
+      transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .toggle-item:hover .toggle-circle { border-color: rgba(120, 180, 255, 0.8); }
+    .toggle-owned input:checked ~ .toggle-circle {
+      background: #58a6ff; border-color: #58a6ff; box-shadow: 0 0 8px rgba(88, 166, 255, 0.8);
+    }
+    .toggle-watched input:checked ~ .toggle-circle {
+      background: #3ec882; border-color: #3ec882; box-shadow: 0 0 8px rgba(62, 200, 130, 0.8);
+    }
+    .toggle-wishlist input:checked ~ .toggle-circle {
+      background: #e6c828; border-color: #e6c828; box-shadow: 0 0 8px rgba(230, 200, 40, 0.8);
+    }
+    .toggle-owned input:checked ~ .toggle-label { color: #58a6ff; }
+    .toggle-watched input:checked ~ .toggle-label { color: #3ec882; }
+    .toggle-wishlist input:checked ~ .toggle-label { color: #e6c828; }
 
     /* List view */
     .list-view { display: block; }
@@ -234,6 +273,17 @@
       <option value="Animation">Animation</option>
       <option value="Live Action">Live Action</option>
     </select>
+    <select id="sortFilter">
+      <option value="none">Sort By...</option>
+      <option value="titleAsc">Title (A-Z)</option>
+      <option value="titleDesc">Title (Z-A)</option>
+      <option value="yearNewest">Year (Newest First)</option>
+      <option value="yearOldest">Year (Oldest First)</option>
+      <option value="genreAsc">Genre (A-Z)</option>
+      <option value="studioAsc">Studio (A-Z)</option>
+      <option value="categoryAsc">Type (A-Z)</option>
+      <option value="formatAsc">Format (A-Z)</option>
+    </select>
     <label class="check-inline">
       <input type="checkbox" id="ownedFilter"> Owned only
     </label>
@@ -244,6 +294,7 @@
       <input type="checkbox" id="wishlistFilter"> Wishlist only
     </label>
     <button id="showAllBtn">Show All</button>
+    <button id="exportWishlistBtn">Export Wishlist</button>
     <div class="view-toggle">
       <button id="listViewBtn">List</button>
       <button id="gridViewBtn">Grid</button>

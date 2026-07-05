@@ -732,6 +732,39 @@ function youtubeTrailerUrl(movie) {
   return "https://www.youtube.com/results?search_query=" + encodeURIComponent(cleanTitleForSearch(movie.title) + " " + movie.year + " trailer");
 }
 
+function sortMovies(list, sortBy) {
+  var sorted = list.slice();
+  switch (sortBy) {
+    case "titleAsc":
+      sorted.sort(function (a, b) { return a.title.localeCompare(b.title); });
+      break;
+    case "titleDesc":
+      sorted.sort(function (a, b) { return b.title.localeCompare(a.title); });
+      break;
+    case "yearNewest":
+      sorted.sort(function (a, b) { return b.year - a.year || a.title.localeCompare(b.title); });
+      break;
+    case "yearOldest":
+      sorted.sort(function (a, b) { return a.year - b.year || a.title.localeCompare(b.title); });
+      break;
+    case "genreAsc":
+      sorted.sort(function (a, b) { return a.genre.localeCompare(b.genre) || a.title.localeCompare(b.title); });
+      break;
+    case "studioAsc":
+      sorted.sort(function (a, b) { return a.studio.localeCompare(b.studio) || a.title.localeCompare(b.title); });
+      break;
+    case "categoryAsc":
+      sorted.sort(function (a, b) { return a.category.localeCompare(b.category) || a.title.localeCompare(b.title); });
+      break;
+    case "formatAsc":
+      sorted.sort(function (a, b) { return a.format.localeCompare(b.format) || a.title.localeCompare(b.title); });
+      break;
+    default:
+      break;
+  }
+  return sorted;
+}
+
 function getUnique(key) {
   var values = movies.map(function (m) { return m[key]; });
   return Array.from(new Set(values)).sort();
@@ -812,9 +845,9 @@ function buildCardHtml(movie, isOwned, isWatched, isWishlist) {
     "<h3>" + movie.title + " (" + movie.year + ")</h3>" +
     "<p>" + movie.genre + " &middot; " + movie.format + " &middot; " + movie.studio + " &middot; Rated " + movie.rating + "</p>" +
     '<div class="checks-row">' +
-    '<label class="check-toggle"><input type="checkbox" class="owned-checkbox" data-id="' + id + '"' + (isOwned ? " checked" : "") + "> Owned</label>" +
-    '<label class="check-toggle"><input type="checkbox" class="watched-checkbox" data-id="' + id + '"' + (isWatched ? " checked" : "") + "> Watched</label>" +
-    '<label class="check-toggle"><input type="checkbox" class="wishlist-checkbox" data-id="' + id + '"' + (isWishlist ? " checked" : "") + "> Wishlist</label>" +
+    '<label class="toggle-item toggle-owned"><input type="checkbox" class="owned-checkbox" data-id="' + id + '"' + (isOwned ? " checked" : "") + '><span class="toggle-circle"></span><span class="toggle-label">Owned</span></label>' +
+    '<label class="toggle-item toggle-watched"><input type="checkbox" class="watched-checkbox" data-id="' + id + '"' + (isWatched ? " checked" : "") + '><span class="toggle-circle"></span><span class="toggle-label">Watched</span></label>' +
+    '<label class="toggle-item toggle-wishlist"><input type="checkbox" class="wishlist-checkbox" data-id="' + id + '"' + (isWishlist ? " checked" : "") + '><span class="toggle-circle"></span><span class="toggle-label">Wishlist</span></label>' +
     "</div>" +
     '<div class="links-row">' + imdbHtml + ebayHtml + trailerHtml + "</div>" +
     "</div>"
@@ -884,6 +917,7 @@ function isDefaultState() {
   var studio = document.getElementById("studioFilter").value;
   var genre = document.getElementById("genreFilter").value;
   var format = document.getElementById("formatFilter").value;
+  var sortBy = document.getElementById("sortFilter").value;
   var onlyOwned = document.getElementById("ownedFilter").checked;
   var onlyWatched = document.getElementById("watchedFilter").checked;
   var onlyWishlist = document.getElementById("wishlistFilter").checked;
@@ -895,6 +929,7 @@ function isDefaultState() {
     studio === "all" &&
     genre === "all" &&
     format === "all" &&
+    sortBy === "none" &&
     !onlyOwned &&
     !onlyWatched &&
     !onlyWishlist
@@ -913,6 +948,7 @@ function applyFilters() {
   var studio = document.getElementById("studioFilter").value;
   var genre = document.getElementById("genreFilter").value;
   var format = document.getElementById("formatFilter").value;
+  var sortBy = document.getElementById("sortFilter").value;
   var onlyOwned = document.getElementById("ownedFilter").checked;
   var onlyWatched = document.getElementById("watchedFilter").checked;
   var onlyWishlist = document.getElementById("wishlistFilter").checked;
@@ -934,6 +970,8 @@ function applyFilters() {
     );
   });
 
+  filtered = sortMovies(filtered, sortBy === "none" ? "titleAsc" : sortBy);
+
   renderMovies(filtered, filtered.length + " result" + (filtered.length === 1 ? "" : "s"));
 }
 
@@ -948,8 +986,50 @@ function showAllMovies() {
   document.getElementById("watchedFilter").checked = false;
   document.getElementById("wishlistFilter").checked = false;
 
-  var sorted = movies.slice().sort(function (a, b) { return a.title.localeCompare(b.title); });
+  var sortBy = document.getElementById("sortFilter").value;
+  var sorted = sortMovies(movies, sortBy === "none" ? "titleAsc" : sortBy);
   renderMovies(sorted, "All " + sorted.length + " Movies");
+}
+
+function csvEscape(value) {
+  var str = String(value == null ? "" : value);
+  if (/[",\n]/.test(str)) {
+    str = '"' + str.replace(/"/g, '""') + '"';
+  }
+  return str;
+}
+
+function exportWishlist() {
+  var wishlist = getSet(WISHLIST_KEY);
+  var wishlistMovies = movies.filter(function (m) { return wishlist.has(movieId(m)); });
+
+  if (wishlistMovies.length === 0) {
+    alert("Your wishlist is empty — check a few \"Wishlist\" boxes first, then export.");
+    return;
+  }
+
+  wishlistMovies.sort(function (a, b) { return a.title.localeCompare(b.title); });
+
+  var header = ["Title", "Year", "Category", "Genre", "Format", "Studio", "Rating", "eBay Search Link"];
+  var rows = [header];
+
+  wishlistMovies.forEach(function (m) {
+    rows.push([m.title, m.year, m.category, m.genre, m.format, m.studio, m.rating, ebaySearchUrl(m)]);
+  });
+
+  var csvContent = rows.map(function (row) {
+    return row.map(csvEscape).join(",");
+  }).join("\r\n");
+
+  var blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  var url = URL.createObjectURL(blob);
+  var link = document.createElement("a");
+  link.href = url;
+  link.download = "umd-wishlist.csv";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 }
 
 function setView(mode) {
@@ -975,10 +1055,12 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("studioFilter").addEventListener("change", applyFilters);
   document.getElementById("genreFilter").addEventListener("change", applyFilters);
   document.getElementById("formatFilter").addEventListener("change", applyFilters);
+  document.getElementById("sortFilter").addEventListener("change", applyFilters);
   document.getElementById("ownedFilter").addEventListener("change", applyFilters);
   document.getElementById("watchedFilter").addEventListener("change", applyFilters);
   document.getElementById("wishlistFilter").addEventListener("change", applyFilters);
   document.getElementById("showAllBtn").addEventListener("click", showAllMovies);
+  document.getElementById("exportWishlistBtn").addEventListener("click", exportWishlist);
   document.getElementById("listViewBtn").addEventListener("click", function () { setView("list"); });
   document.getElementById("gridViewBtn").addEventListener("click", function () { setView("grid"); });
 });
