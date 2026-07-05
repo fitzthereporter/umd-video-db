@@ -1,7 +1,7 @@
 console.log("UMD Database app loaded");
 
 // Paste your free TMDB API key here (get one at https://www.themoviedb.org/settings/api)
-const TMDB_API_KEY = "bc3063428217fda0a6640d1850534411";
+const TMDB_API_KEY = "";
 const TMDB_IMG_BASE = "https://image.tmdb.org/t/p/w200";
 
 // Starter dataset — add a real image URL to "cover" to override auto-fetched art.
@@ -159,7 +159,7 @@ const movies = [
   { category: "Movie", title: "Batman: The Movie", year: 1966, genre: "Action", format: "Live Action", studio: "20th Century Fox", rating: "NR", cover: "" },
   { category: "Movie", title: "Beavis and Butt-Head: The Mike Judge Collection Vol. 2", year: 2005, genre: "Comedy", format: "Animation", studio: "Paramount", rating: "NR", cover: "" },
   { category: "Movie", title: "Beavis and Butt-Head: The Mike Judge Collection Vol. 3", year: 2005, genre: "Comedy", format: "Animation", studio: "Paramount", rating: "NR", cover: "" },
-  { category: "Movie", title: "Beowulf", year: 2007, genre: "Fantasy", format: "Animation", studio: "Paramount", rating: "PG-13", cover: "" },
+  { category: "Movie", title: "Beowulf", year: 2007, genre: "Fantasy", format: "Live Action", studio: "Paramount", rating: "PG-13", cover: "" },
   { category: "Movie", title: "Bewitched", year: 2005, genre: "Comedy", format: "Live Action", studio: "Sony Pictures", rating: "PG-13", cover: "" },
   { category: "Movie", title: "Big Daddy", year: 1999, genre: "Comedy", format: "Live Action", studio: "Sony Pictures", rating: "PG-13", cover: "" },
   { category: "Movie", title: "Bill and Ted's Excellent Adventure", year: 1989, genre: "Comedy", format: "Live Action", studio: "MGM", rating: "PG", cover: "" },
@@ -355,7 +355,7 @@ const movies = [
   { category: "Movie", title: "Stargate", year: 1994, genre: "Sci-Fi", format: "Live Action", studio: "MGM", rating: "PG-13", cover: "" },
   { category: "Movie", title: "Starship Troopers 3: Marauder", year: 2008, genre: "Sci-Fi", format: "Live Action", studio: "Sony Pictures", rating: "R", cover: "" },
   { category: "Movie", title: "Stealth", year: 2005, genre: "Action", format: "Live Action", studio: "Sony Pictures", rating: "PG-13", cover: "" },
-  { category: "Movie", title: "Steamboy", year: 2004, genre: "Anime", format: "Animation", studio: "Sony Pictures Classics", rating: "PG-13", cover: "" },
+  { category: "Movie", title: "Steamboy", year: 2005, genre: "Anime", format: "Animation", studio: "Sony Pictures Classics", rating: "PG-13", cover: "" },
   { category: "Movie", title: "Step Brothers", year: 2008, genre: "Comedy", format: "Live Action", studio: "Sony Pictures", rating: "R", cover: "" },
   { category: "Movie", title: "Stomp the Yard", year: 2007, genre: "Drama", format: "Live Action", studio: "Sony Pictures", rating: "PG-13", cover: "" },
   { category: "Movie", title: "Stripes", year: 1981, genre: "Comedy", format: "Live Action", studio: "Sony Pictures", rating: "R", cover: "" },
@@ -469,16 +469,16 @@ const movies = [
   { category: "TV", title: "Family Guy, Vol. Two: Season 3", year: 2004, genre: "Comedy", format: "Animation", studio: "20th Century Fox", rating: "NR", cover: "" },
   { category: "TV", title: "Ghost in the Shell: Stand Alone Complex, Season 1 - Vol. 1", year: 2003, genre: "Anime", format: "Animation", studio: "Bandai", rating: "NR", cover: "" },
   { category: "TV", title: "Good Times: Season 1", year: 1974, genre: "Comedy", format: "Live Action", studio: "Sony Pictures", rating: "NR", cover: "" },
-  { category: "TV", title: "Gungrave: Volume 1", year: 2003, genre: "Anime", format: "Animation", studio: "Geneon", rating: "NR", cover: "" },
-  { category: "TV", title: "Hellsing, Vol. 1: Impure Souls", year: 2001, genre: "Anime", format: "Animation", studio: "Geneon", rating: "NR", cover: "" },
-  { category: "TV", title: "Ikki Tousen: Legendary Fighter, Vol. 1", year: 2003, genre: "Anime", format: "Animation", studio: "Media Blasters", rating: "NR", cover: "" },
-  { category: "TV", title: "Last Exile, Vol. 1", year: 2003, genre: "Anime", format: "Animation", studio: "Geneon", rating: "NR", cover: "" },
+  { category: "TV", title: "Gungrave: Volume 1", year: 2004, genre: "Anime", format: "Animation", studio: "Geneon", rating: "NR", cover: "" },
+  { category: "TV", title: "Hellsing, Vol. 1: Impure Souls", year: 2002, genre: "Anime", format: "Animation", studio: "Geneon", rating: "NR", cover: "" },
+  { category: "TV", title: "Ikki Tousen: Legendary Fighter, Vol. 1", year: 2005, genre: "Anime", format: "Animation", studio: "Media Blasters", rating: "NR", cover: "" },
+  { category: "TV", title: "Last Exile, Vol. 1", year: 2004, genre: "Anime", format: "Animation", studio: "Geneon", rating: "NR", cover: "" },
   { category: "TV", title: "Lost: The Series Pilot, Parts I and II", year: 2004, genre: "Drama", format: "Live Action", studio: "ABC", rating: "NR", cover: "" },
-  { category: "TV", title: "Paranoia Agent, Vol. 1", year: 2004, genre: "Anime", format: "Animation", studio: "Geneon", rating: "NR", cover: "" },
-  { category: "TV", title: "R.O.D the TV, Vol. 1", year: 2003, genre: "Anime", format: "Animation", studio: "Geneon", rating: "NR", cover: "" },
+  { category: "TV", title: "Paranoia Agent, Vol. 1", year: 2005, genre: "Anime", format: "Animation", studio: "Geneon", rating: "NR", cover: "" },
+  { category: "TV", title: "R.O.D the TV, Vol. 1", year: 2005, genre: "Anime", format: "Animation", studio: "Geneon", rating: "NR", cover: "" },
   { category: "TV", title: "Ren & Stimpy: The First and Second Seasons, Vol. 1", year: 1991, genre: "Animation", format: "Animation", studio: "Paramount", rating: "NR", cover: "" },
   { category: "TV", title: "Ricky Gervais' Extras: Episodes 1-6", year: 2005, genre: "Comedy", format: "Live Action", studio: "HBO", rating: "NR", cover: "" },
-  { category: "TV", title: "S-Cry-Ed, Vol. 1: The Lost Ground", year: 2001, genre: "Anime", format: "Animation", studio: "Bandai", rating: "NR", cover: "" },
+  { category: "TV", title: "S-Cry-Ed, Vol. 1: The Lost Ground", year: 2003, genre: "Anime", format: "Animation", studio: "Bandai", rating: "NR", cover: "" },
   { category: "TV", title: "Samurai Champloo: Episodes 1 & 2", year: 2004, genre: "Anime", format: "Animation", studio: "Geneon", rating: "NR", cover: "" },
   { category: "TV", title: "Samurai Champloo, Volume 2", year: 2004, genre: "Anime", format: "Animation", studio: "Geneon", rating: "NR", cover: "" },
   { category: "TV", title: "Samurai Champloo, Volume 3", year: 2005, genre: "Anime", format: "Animation", studio: "Geneon", rating: "NR", cover: "" },
@@ -488,11 +488,11 @@ const movies = [
   { category: "TV", title: "Spider-Man: The New Animated Series - The Mutant Menace", year: 2003, genre: "Action", format: "Animation", studio: "Sony Pictures", rating: "NR", cover: "" },
   { category: "TV", title: "SpongeBob SquarePants: The 1st Season, Volume 1", year: 1999, genre: "Family", format: "Animation", studio: "Paramount", rating: "NR", cover: "" },
   { category: "TV", title: "Stargate Atlantis: Pilot Episode", year: 2004, genre: "Sci-Fi", format: "Live Action", studio: "MGM", rating: "NR", cover: "" },
-  { category: "TV", title: "Tenjho Tenge, Volume 1: Episodes 1 & 2", year: 2004, genre: "Anime", format: "Animation", studio: "Media Blasters", rating: "NR", cover: "" },
+  { category: "TV", title: "Tenjho Tenge, Volume 1: Episodes 1 & 2", year: 2005, genre: "Anime", format: "Animation", studio: "Media Blasters", rating: "NR", cover: "" },
   { category: "TV", title: "The Boondocks", year: 2005, genre: "Comedy", format: "Animation", studio: "Sony Pictures", rating: "NR", cover: "" },
   { category: "TV", title: "The Twilight Zone: Nightmare at 20,000 Feet", year: 1963, genre: "Sci-Fi", format: "Live Action", studio: "CBS", rating: "NR", cover: "" },
-  { category: "TV", title: "Trigun, Vol. 1", year: 1998, genre: "Anime", format: "Animation", studio: "Geneon", rating: "NR", cover: "" },
-  { category: "TV", title: "Viewtiful Joe, Vol. 1", year: 2004, genre: "Anime", format: "Animation", studio: "Media Blasters", rating: "NR", cover: "" },
+  { category: "TV", title: "Trigun, Vol. 1", year: 2000, genre: "Anime", format: "Animation", studio: "Geneon", rating: "NR", cover: "" },
+  { category: "TV", title: "Viewtiful Joe, Vol. 1", year: 2005, genre: "Anime", format: "Animation", studio: "Media Blasters", rating: "NR", cover: "" },
   { category: "TV", title: "Viva La Bam, Volume 1", year: 2003, genre: "Comedy", format: "Live Action", studio: "MTV", rating: "NR", cover: "" },
   { category: "TV", title: "Viva La Bam, Volume 2", year: 2004, genre: "Comedy", format: "Live Action", studio: "MTV", rating: "NR", cover: "" },
   { category: "TV", title: "Viva La Bam, Volume 3", year: 2004, genre: "Comedy", format: "Live Action", studio: "MTV", rating: "NR", cover: "" },
@@ -596,6 +596,7 @@ const movies = [
 
 var OWNED_KEY = "umdOwnedCollection";
 var WATCHED_KEY = "umdWatchedCollection";
+var WISHLIST_KEY = "umdWishlistCollection";
 var VIEW_KEY = "umdViewMode";
 var COVER_CACHE_KEY = "umdCoverCache";
 
@@ -709,7 +710,7 @@ function populateFilters() {
   });
 }
 
-function buildCardHtml(movie, isOwned, isWatched) {
+function buildCardHtml(movie, isOwned, isWatched, isWishlist) {
   var id = movieId(movie);
   var coverHtml = movie.cover
     ? '<img class="cover" data-cover-id="' + id + '" src="' + movie.cover + '" alt="' + movie.title + ' cover">'
@@ -727,6 +728,7 @@ function buildCardHtml(movie, isOwned, isWatched) {
     '<div class="checks-row">' +
     '<label class="check-toggle"><input type="checkbox" class="owned-checkbox" data-id="' + id + '"' + (isOwned ? " checked" : "") + "> Owned</label>" +
     '<label class="check-toggle"><input type="checkbox" class="watched-checkbox" data-id="' + id + '"' + (isWatched ? " checked" : "") + "> Watched</label>" +
+    '<label class="check-toggle"><input type="checkbox" class="wishlist-checkbox" data-id="' + id + '"' + (isWishlist ? " checked" : "") + "> Wishlist</label>" +
     "</div>" +
     imdbHtml +
     "</div>"
@@ -747,18 +749,22 @@ function renderMovies(list, heading) {
 
   var owned = getSet(OWNED_KEY);
   var watched = getSet(WATCHED_KEY);
+  var wishlist = getSet(WISHLIST_KEY);
 
   list.forEach(function (movie) {
     var id = movieId(movie);
     var card = document.createElement("div");
     card.className = "movie-card";
-    card.innerHTML = buildCardHtml(movie, owned.has(id), watched.has(id));
+    card.innerHTML = buildCardHtml(movie, owned.has(id), watched.has(id), wishlist.has(id));
 
     card.querySelector(".owned-checkbox").addEventListener("change", function () {
       toggleInSet(OWNED_KEY, id);
     });
     card.querySelector(".watched-checkbox").addEventListener("change", function () {
       toggleInSet(WATCHED_KEY, id);
+    });
+    card.querySelector(".wishlist-checkbox").addEventListener("change", function () {
+      toggleInSet(WISHLIST_KEY, id);
     });
 
     container.appendChild(card);
@@ -794,6 +800,7 @@ function isDefaultState() {
   var format = document.getElementById("formatFilter").value;
   var onlyOwned = document.getElementById("ownedFilter").checked;
   var onlyWatched = document.getElementById("watchedFilter").checked;
+  var onlyWishlist = document.getElementById("wishlistFilter").checked;
 
   return (
     searchTerm === "" &&
@@ -803,7 +810,8 @@ function isDefaultState() {
     genre === "all" &&
     format === "all" &&
     !onlyOwned &&
-    !onlyWatched
+    !onlyWatched &&
+    !onlyWishlist
   );
 }
 
@@ -821,8 +829,10 @@ function applyFilters() {
   var format = document.getElementById("formatFilter").value;
   var onlyOwned = document.getElementById("ownedFilter").checked;
   var onlyWatched = document.getElementById("watchedFilter").checked;
+  var onlyWishlist = document.getElementById("wishlistFilter").checked;
   var owned = getSet(OWNED_KEY);
   var watched = getSet(WATCHED_KEY);
+  var wishlist = getSet(WISHLIST_KEY);
 
   var filtered = movies.filter(function (m) {
     return (
@@ -833,7 +843,8 @@ function applyFilters() {
       (genre === "all" || m.genre === genre) &&
       (format === "all" || m.format === format) &&
       (!onlyOwned || owned.has(movieId(m))) &&
-      (!onlyWatched || watched.has(movieId(m)))
+      (!onlyWatched || watched.has(movieId(m))) &&
+      (!onlyWishlist || wishlist.has(movieId(m)))
     );
   });
 
@@ -849,6 +860,7 @@ function showAllMovies() {
   document.getElementById("formatFilter").value = "all";
   document.getElementById("ownedFilter").checked = false;
   document.getElementById("watchedFilter").checked = false;
+  document.getElementById("wishlistFilter").checked = false;
 
   var sorted = movies.slice().sort(function (a, b) { return a.title.localeCompare(b.title); });
   renderMovies(sorted, "All " + sorted.length + " Movies");
@@ -879,6 +891,7 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("formatFilter").addEventListener("change", applyFilters);
   document.getElementById("ownedFilter").addEventListener("change", applyFilters);
   document.getElementById("watchedFilter").addEventListener("change", applyFilters);
+  document.getElementById("wishlistFilter").addEventListener("change", applyFilters);
   document.getElementById("showAllBtn").addEventListener("click", showAllMovies);
   document.getElementById("listViewBtn").addEventListener("click", function () { setView("list"); });
   document.getElementById("gridViewBtn").addEventListener("click", function () { setView("grid"); });
