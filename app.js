@@ -336,7 +336,7 @@ function setView(mode) {
 document.addEventListener("DOMContentLoaded", function () {
   populateFilters();
 
-  var savedView = localStorage.getItem(VIEW_KEY) || "list";
+  var savedView = localStorage.getItem(VIEW_KEY) || "grid";
   setView(savedView);
 
   renderMovies(getRandomPicks(8), "Random Picks — search or filter to browse everything");
