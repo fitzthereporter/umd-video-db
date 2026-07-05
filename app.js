@@ -708,6 +708,30 @@ function hasImdbEntry(movie) {
   return movie.category === "Movie" || movie.category === "TV" || movie.category === "Stand-up";
 }
 
+function ebaySearchUrl(movie) {
+  return "https://www.ebay.com/sch/i.html?_nkw=" + encodeURIComponent(movie.title + " UMD");
+}
+
+function cleanTitleForSearch(title) {
+  var t = title;
+  // Strip trailing parenthetical annotations like (1976), (Unrated), (IMAX) —
+  // the exact year gets added back separately from the movie's year field.
+  t = t.replace(/\s*\([^)]*\)\s*$/, "");
+  // Strip volume/season/disc/part/episode qualifiers after a colon or comma
+  var idx = t.search(/[:,]/);
+  if (idx !== -1) {
+    var rest = t.slice(idx + 1);
+    if (/vol|volume|season|disc|part|episode/i.test(rest)) {
+      t = t.slice(0, idx);
+    }
+  }
+  return t.trim();
+}
+
+function youtubeTrailerUrl(movie) {
+  return "https://www.youtube.com/results?search_query=" + encodeURIComponent(cleanTitleForSearch(movie.title) + " " + movie.year + " trailer");
+}
+
 function getUnique(key) {
   var values = movies.map(function (m) { return m[key]; });
   return Array.from(new Set(values)).sort();
@@ -757,15 +781,30 @@ function placeholderClass(movie) {
   return "placeholder-default";
 }
 
+function placeholderEmoji(movie) {
+  if (movie.category === "Sports") {
+    return /wwe|wrestl/i.test(movie.title) ? "🥊" : "⚽🏀🏈";
+  }
+  if (movie.category === "Concert/Music") return "🎶";
+  if (movie.category === "TV") return "📺";
+  if (movie.category === "Stand-up") return "🎤";
+  return "🎬";
+}
+
 function buildCardHtml(movie, isOwned, isWatched, isWishlist) {
   var id = movieId(movie);
   var coverHtml = movie.cover
     ? '<img class="cover" data-cover-id="' + id + '" src="' + movie.cover + '" alt="' + movie.title + ' cover">'
-    : '<div class="cover cover-placeholder ' + placeholderClass(movie) + '" data-cover-id="' + id + '">' + movie.title + "</div>";
+    : '<div class="cover cover-placeholder ' + placeholderClass(movie) + '" data-cover-id="' + id + '">' +
+      '<span class="placeholder-emoji">' + placeholderEmoji(movie) + '</span>' +
+      '<span class="placeholder-title">' + movie.title + '</span>' +
+      '</div>';
 
   var imdbHtml = hasImdbEntry(movie)
     ? '<a class="imdb-btn" href="' + imdbSearchUrl(movie) + '" target="_blank" rel="noopener">IMDb Entry</a>'
     : "";
+  var ebayHtml = '<a class="ebay-btn" href="' + ebaySearchUrl(movie) + '" target="_blank" rel="noopener">Find on eBay</a>';
+  var trailerHtml = '<a class="trailer-btn" href="' + youtubeTrailerUrl(movie) + '" target="_blank" rel="noopener">YouTube Trailer</a>';
 
   return (
     coverHtml +
@@ -777,7 +816,7 @@ function buildCardHtml(movie, isOwned, isWatched, isWishlist) {
     '<label class="check-toggle"><input type="checkbox" class="watched-checkbox" data-id="' + id + '"' + (isWatched ? " checked" : "") + "> Watched</label>" +
     '<label class="check-toggle"><input type="checkbox" class="wishlist-checkbox" data-id="' + id + '"' + (isWishlist ? " checked" : "") + "> Wishlist</label>" +
     "</div>" +
-    imdbHtml +
+    '<div class="links-row">' + imdbHtml + ebayHtml + trailerHtml + "</div>" +
     "</div>"
   );
 }
