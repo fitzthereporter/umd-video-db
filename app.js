@@ -1,7 +1,7 @@
 console.log("UMD Database app loaded");
 
 // Paste your free TMDB API key here (get one at https://www.themoviedb.org/settings/api)
-const TMDB_API_KEY = "";
+const TMDB_API_KEY = "bc3063428217fda0a6640d1850534411";
 const TMDB_IMG_BASE = "https://image.tmdb.org/t/p/w200";
 
 // Starter dataset — add a real image URL to "cover" to override auto-fetched art.
