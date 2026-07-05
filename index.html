@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>UMD Database</title>
   <style>
     * { box-sizing: border-box; }
@@ -87,7 +88,7 @@
       box-shadow: 0 0 10px rgba(88, 166, 255, 0.7);
     }
 
-    #showAllBtn, #exportWishlistBtn, .file-btn {
+    #showAllBtn, #exportWishlistBtn, .file-btn, #statsBtn {
       padding: 7px 16px;
       cursor: pointer;
       border-radius: 16px;
@@ -96,7 +97,7 @@
       color: #cfe0ff;
       display: inline-block;
     }
-    #showAllBtn:hover, #exportWishlistBtn:hover, .file-btn:hover { border-color: #58a6ff; }
+    #showAllBtn:hover, #exportWishlistBtn:hover, .file-btn:hover, #statsBtn:hover { border-color: #58a6ff; }
 
     #resultsHeading {
       color: #cfe0ff;
@@ -249,6 +250,104 @@
     .ebay-btn:hover { background: rgba(0, 100, 210, 0.3); }
     .trailer-btn { background: rgba(230, 33, 23, 0.15); border: 1px solid #ff5548; color: #ff5548; }
     .trailer-btn:hover { background: rgba(230, 33, 23, 0.3); }
+
+    /* Stats modal */
+    #statsModalOverlay {
+      position: fixed; inset: 0;
+      background: rgba(0, 5, 15, 0.85);
+      display: none; align-items: center; justify-content: center;
+      z-index: 1000; padding: 20px;
+    }
+    #statsModalOverlay.visible { display: flex; }
+    #statsModalPanel {
+      background: linear-gradient(180deg, #0a1a3c, #0d2a5c);
+      border: 1px solid rgba(120, 180, 255, 0.4);
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 900px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 0 30px rgba(88, 166, 255, 0.3);
+    }
+    .stats-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .stats-header h2 { margin: 0; color: #ffffff; letter-spacing: 2px; text-transform: uppercase; font-size: 18px; }
+    #statsCloseBtn {
+      background: none; border: 1px solid rgba(120, 180, 255, 0.4); color: #cfe0ff;
+      border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-size: 16px; line-height: 1;
+    }
+    #statsCloseBtn:hover { border-color: #58a6ff; }
+    .stats-summary-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+    .stat-box {
+      flex: 1; min-width: 110px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(120, 180, 255, 0.25);
+      border-radius: 10px; padding: 12px; text-align: center;
+    }
+    .stat-number { font-size: 24px; font-weight: 700; color: #58a6ff; }
+    .stat-label { font-size: 11px; color: #9fb8e0; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+    .stats-charts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 20px; }
+    @media (max-width: 700px) { .stats-charts-grid { grid-template-columns: 1fr; } }
+    .chart-box { background: rgba(255, 255, 255, 0.03); border-radius: 10px; padding: 10px; height: 260px; position: relative; }
+    .chart-box.wide { grid-column: 1 / -1; }
+    .stats-table { width: 100%; border-collapse: collapse; font-size: 13px; color: #cfe0ff; }
+    .stats-table th, .stats-table td { padding: 6px 10px; border-bottom: 1px solid rgba(120, 180, 255, 0.15); text-align: left; }
+    .stats-table th { color: #7fa8e0; text-transform: uppercase; font-size: 11px; letter-spacing: 1px; }
+
+    /* Mobile adjustments */
+    @media (max-width: 600px) {
+      body { padding: 16px 12px 40px; }
+      h1 { font-size: 19px; letter-spacing: 3px; }
+      .subtitle { font-size: 10px; margin-bottom: 20px; }
+
+      #controls { padding: 10px; gap: 8px; }
+      #searchInput { font-size: 16px; padding: 10px 12px; }
+      select, #sortFilter {
+        flex: 1 1 calc(50% - 8px);
+        font-size: 13px;
+        padding: 8px;
+      }
+      .check-inline { flex: 1 1 calc(50% - 8px); font-size: 12px; }
+      #showAllBtn, #exportWishlistBtn, .file-btn, #statsBtn {
+        flex: 1 1 calc(50% - 8px);
+        text-align: center;
+        font-size: 12px;
+        padding: 8px 10px;
+      }
+      .view-toggle { flex: 1 1 100%; display: flex; }
+      .view-toggle button { flex: 1; }
+
+      #resultsHeading { font-size: 12px; }
+
+      .movie-card h3 { font-size: 13px; }
+      .movie-card p { font-size: 11px; }
+      .toggle-item { font-size: 11px; margin-right: 8px; }
+      .toggle-circle { width: 13px; height: 13px; }
+      .imdb-btn, .ebay-btn, .trailer-btn { font-size: 10px; padding: 4px 8px; }
+
+      #statsModalPanel { padding: 14px; }
+      .stats-header h2 { font-size: 15px; }
+      .stat-box { min-width: 80px; padding: 8px; }
+      .stat-number { font-size: 18px; }
+      .stat-label { font-size: 9px; }
+      .chart-box { height: 200px; padding: 6px; }
+      .stats-table { font-size: 11px; }
+    }
+
+    /* Extra-narrow phones: stack list-view cards instead of squeezing them side-by-side */
+    @media (max-width: 420px) {
+      .list-view .movie-card {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .list-view .cover, .list-view .cover-placeholder {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 2 / 3;
+      }
+      .list-view .placeholder-emoji { font-size: 28px; }
+      .list-view .placeholder-title { font-size: 11px; }
+    }
   </style>
 </head>
 <body>
@@ -298,6 +397,7 @@
     <button id="exportWishlistBtn">Export Collection</button>
     <label class="file-btn" for="importWishlistInput">Import Collection</label>
     <input type="file" id="importWishlistInput" accept=".csv" style="display: none;">
+    <button id="statsBtn">📊 Stats</button>
     <div class="view-toggle">
       <button id="listViewBtn">List</button>
       <button id="gridViewBtn">Grid</button>
@@ -307,6 +407,28 @@
   <div id="resultsHeading"></div>
   <div id="results"></div>
 
+  <div id="statsModalOverlay">
+    <div id="statsModalPanel">
+      <div class="stats-header">
+        <h2>Collection Stats</h2>
+        <button id="statsCloseBtn">✕</button>
+      </div>
+
+      <div id="statsSummary" class="stats-summary-row"></div>
+
+      <div class="stats-charts-grid">
+        <div class="chart-box"><canvas id="statsWatchedChart"></canvas></div>
+        <div class="chart-box"><canvas id="statsOwnedWishlistChart"></canvas></div>
+        <div class="chart-box"><canvas id="statsGenreOwnedChart"></canvas></div>
+        <div class="chart-box"><canvas id="statsGenreWishlistChart"></canvas></div>
+        <div class="chart-box wide"><canvas id="statsDecadeChart"></canvas></div>
+      </div>
+
+      <div id="statsCategoryTable"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

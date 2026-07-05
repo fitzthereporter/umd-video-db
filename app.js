@@ -1159,6 +1159,176 @@ function importCollectionFromCSV(file) {
   reader.readAsText(file);
 }
 
+var statsChartInstances = [];
+
+function destroyStatsCharts() {
+  statsChartInstances.forEach(function (c) { c.destroy(); });
+  statsChartInstances = [];
+}
+
+function computeStats() {
+  var owned = getSet(OWNED_KEY);
+  var watched = getSet(WATCHED_KEY);
+  var wishlist = getSet(WISHLIST_KEY);
+
+  var ownedMovies = movies.filter(function (m) { return owned.has(movieId(m)); });
+  var watchedOfOwned = ownedMovies.filter(function (m) { return watched.has(movieId(m)); }).length;
+  var notWatchedOfOwned = ownedMovies.length - watchedOfOwned;
+
+  var genreOwned = {};
+  var genreWishlist = {};
+  ownedMovies.forEach(function (m) { genreOwned[m.genre] = (genreOwned[m.genre] || 0) + 1; });
+  movies.filter(function (m) { return wishlist.has(movieId(m)); }).forEach(function (m) {
+    genreWishlist[m.genre] = (genreWishlist[m.genre] || 0) + 1;
+  });
+
+  function decadeOf(year) { return Math.floor(year / 10) * 10 + "s"; }
+  var decadeCounts = {};
+  movies.forEach(function (m) {
+    var id = movieId(m);
+    if (owned.has(id) || wishlist.has(id)) {
+      var dec = decadeOf(m.year);
+      if (!decadeCounts[dec]) decadeCounts[dec] = { owned: 0, wishlist: 0 };
+      if (owned.has(id)) decadeCounts[dec].owned++;
+      if (wishlist.has(id)) decadeCounts[dec].wishlist++;
+    }
+  });
+
+  var categoryCounts = {};
+  movies.forEach(function (m) {
+    var id = movieId(m);
+    if (!categoryCounts[m.category]) categoryCounts[m.category] = { owned: 0, watched: 0, wishlist: 0 };
+    if (owned.has(id)) categoryCounts[m.category].owned++;
+    if (watched.has(id)) categoryCounts[m.category].watched++;
+    if (wishlist.has(id)) categoryCounts[m.category].wishlist++;
+  });
+
+  return {
+    ownedTotal: owned.size,
+    watchedTotal: watched.size,
+    wishlistTotal: wishlist.size,
+    databaseTotal: movies.length,
+    watchedOfOwned: watchedOfOwned,
+    notWatchedOfOwned: notWatchedOfOwned,
+    genreOwned: genreOwned,
+    genreWishlist: genreWishlist,
+    decadeCounts: decadeCounts,
+    categoryCounts: categoryCounts
+  };
+}
+
+function chartColorPalette(n) {
+  var palette = ["#58a6ff", "#3ec882", "#e6c828", "#ff5548", "#c85ee6", "#4da3ff", "#7fd4ff", "#ffb3ef", "#a8f0cf", "#ffe98a"];
+  var colors = [];
+  for (var i = 0; i < n; i++) colors.push(palette[i % palette.length]);
+  return colors;
+}
+
+function renderStatsModal() {
+  destroyStatsCharts();
+  var stats = computeStats();
+
+  document.getElementById("statsSummary").innerHTML =
+    "<div class='stat-box'><div class='stat-number'>" + stats.ownedTotal + "</div><div class='stat-label'>Owned</div></div>" +
+    "<div class='stat-box'><div class='stat-number'>" + stats.watchedTotal + "</div><div class='stat-label'>Watched</div></div>" +
+    "<div class='stat-box'><div class='stat-number'>" + stats.wishlistTotal + "</div><div class='stat-label'>Wishlisted</div></div>" +
+    "<div class='stat-box'><div class='stat-number'>" + stats.databaseTotal + "</div><div class='stat-label'>Total In Database</div></div>";
+
+  var textColor = "#cfe0ff";
+  var mutedColor = "#9fb8e0";
+
+  statsChartInstances.push(new Chart(document.getElementById("statsWatchedChart").getContext("2d"), {
+    type: "doughnut",
+    data: {
+      labels: ["Watched", "Not Watched Yet"],
+      datasets: [{ data: [stats.watchedOfOwned, stats.notWatchedOfOwned], backgroundColor: ["#3ec882", "rgba(120,180,255,0.25)"] }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { labels: { color: textColor } },
+        title: { display: true, text: "Of Your Owned Titles: Watched vs Not", color: textColor }
+      }
+    }
+  }));
+
+  statsChartInstances.push(new Chart(document.getElementById("statsOwnedWishlistChart").getContext("2d"), {
+    type: "doughnut",
+    data: {
+      labels: ["Owned", "Wishlisted"],
+      datasets: [{ data: [stats.ownedTotal, stats.wishlistTotal], backgroundColor: ["#58a6ff", "#e6c828"] }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { labels: { color: textColor } },
+        title: { display: true, text: "Owned vs Wishlisted", color: textColor }
+      }
+    }
+  }));
+
+  var genreOwnedLabels = Object.keys(stats.genreOwned).sort(function (a, b) { return stats.genreOwned[b] - stats.genreOwned[a]; });
+  statsChartInstances.push(new Chart(document.getElementById("statsGenreOwnedChart").getContext("2d"), {
+    type: "bar",
+    data: {
+      labels: genreOwnedLabels,
+      datasets: [{ label: "Owned", data: genreOwnedLabels.map(function (g) { return stats.genreOwned[g]; }), backgroundColor: chartColorPalette(genreOwnedLabels.length) }]
+    },
+    options: {
+      indexAxis: "y", responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, title: { display: true, text: "Owned by Genre", color: textColor } },
+      scales: { x: { ticks: { color: mutedColor }, grid: { color: "rgba(120,180,255,0.1)" } }, y: { ticks: { color: mutedColor }, grid: { color: "rgba(120,180,255,0.1)" } } }
+    }
+  }));
+
+  var genreWishlistLabels = Object.keys(stats.genreWishlist).sort(function (a, b) { return stats.genreWishlist[b] - stats.genreWishlist[a]; });
+  statsChartInstances.push(new Chart(document.getElementById("statsGenreWishlistChart").getContext("2d"), {
+    type: "bar",
+    data: {
+      labels: genreWishlistLabels,
+      datasets: [{ label: "Wishlisted", data: genreWishlistLabels.map(function (g) { return stats.genreWishlist[g]; }), backgroundColor: chartColorPalette(genreWishlistLabels.length) }]
+    },
+    options: {
+      indexAxis: "y", responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, title: { display: true, text: "Wishlisted by Genre", color: textColor } },
+      scales: { x: { ticks: { color: mutedColor }, grid: { color: "rgba(120,180,255,0.1)" } }, y: { ticks: { color: mutedColor }, grid: { color: "rgba(120,180,255,0.1)" } } }
+    }
+  }));
+
+  var decadeLabels = Object.keys(stats.decadeCounts).sort();
+  statsChartInstances.push(new Chart(document.getElementById("statsDecadeChart").getContext("2d"), {
+    type: "bar",
+    data: {
+      labels: decadeLabels,
+      datasets: [
+        { label: "Owned", data: decadeLabels.map(function (d) { return stats.decadeCounts[d].owned; }), backgroundColor: "#58a6ff" },
+        { label: "Wishlisted", data: decadeLabels.map(function (d) { return stats.decadeCounts[d].wishlist; }), backgroundColor: "#e6c828" }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: textColor } }, title: { display: true, text: "Owned & Wishlisted by Decade", color: textColor } },
+      scales: { x: { ticks: { color: mutedColor }, grid: { color: "rgba(120,180,255,0.1)" } }, y: { ticks: { color: mutedColor }, grid: { color: "rgba(120,180,255,0.1)" } } }
+    }
+  }));
+
+  var categoryTableRows = Object.keys(stats.categoryCounts).sort().map(function (cat) {
+    var c = stats.categoryCounts[cat];
+    return "<tr><td>" + cat + "</td><td>" + c.owned + "</td><td>" + c.watched + "</td><td>" + c.wishlist + "</td></tr>";
+  }).join("");
+  document.getElementById("statsCategoryTable").innerHTML =
+    "<table class='stats-table'><thead><tr><th>Type</th><th>Owned</th><th>Watched</th><th>Wishlisted</th></tr></thead><tbody>" + categoryTableRows + "</tbody></table>";
+}
+
+function openStatsModal() {
+  document.getElementById("statsModalOverlay").classList.add("visible");
+  renderStatsModal();
+}
+
+function closeStatsModal() {
+  document.getElementById("statsModalOverlay").classList.remove("visible");
+}
+
 function setView(mode) {
   var container = document.getElementById("results");
   container.classList.remove("list-view", "grid-view");
@@ -1196,4 +1366,9 @@ document.addEventListener("DOMContentLoaded", function () {
   });
   document.getElementById("listViewBtn").addEventListener("click", function () { setView("list"); });
   document.getElementById("gridViewBtn").addEventListener("click", function () { setView("grid"); });
+  document.getElementById("statsBtn").addEventListener("click", openStatsModal);
+  document.getElementById("statsCloseBtn").addEventListener("click", closeStatsModal);
+  document.getElementById("statsModalOverlay").addEventListener("click", function (e) {
+    if (e.target.id === "statsModalOverlay") closeStatsModal();
+  });
 });
