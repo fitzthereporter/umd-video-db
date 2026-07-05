@@ -1,1 +1,118 @@
 console.log("UMD Database app loaded");
+
+// Starter dataset — add a real image URL to "cover" whenever you have one.
+const movies = [
+  { title: "50 First Dates", year: 2004, genre: "Comedy", format: "Live Action", studio: "Sony Pictures", rating: "PG-13", cover: "" },
+  { title: "American Pie", year: 1999, genre: "Comedy", format: "Live Action", studio: "Universal", rating: "NR", cover: "" },
+  { title: "American Pie 2", year: 2001, genre: "Comedy", format: "Live Action", studio: "Universal", rating: "NR", cover: "" },
+  { title: "The Amityville Horror", year: 2005, genre: "Horror", format: "Live Action", studio: "MGM", rating: "R", cover: "" },
+  { title: "Barbershop", year: 2002, genre: "Comedy", format: "Live Action", studio: "MGM", rating: "PG-13", cover: "" },
+  { title: "Batman Begins", year: 2005, genre: "Action", format: "Live Action", studio: "Warner Bros.", rating: "PG-13", cover: "" },
+  { title: "Be Cool", year: 2005, genre: "Comedy", format: "Live Action", studio: "MGM", rating: "PG-13", cover: "" },
+  { title: "Beauty Shop", year: 2005, genre: "Comedy", format: "Live Action", studio: "MGM", rating: "PG-13", cover: "" },
+  { title: "Big Trouble in Little China", year: 1986, genre: "Action", format: "Live Action", studio: "20th Century Fox", rating: "PG-13", cover: "" },
+  { title: "Boogeyman", year: 2005, genre: "Horror", format: "Live Action", studio: "Sony Pictures", rating: "PG-13", cover: "" },
+  { title: "Cabin Fever", year: 2003, genre: "Horror", format: "Live Action", studio: "Lionsgate", rating: "R", cover: "" },
+  { title: "Christmas with the Kranks", year: 2004, genre: "Comedy", format: "Live Action", studio: "Sony Pictures", rating: "PG", cover: "" },
+  { title: "Click", year: 2006, genre: "Comedy", format: "Live Action", studio: "Sony Pictures", rating: "PG-13", cover: "" },
+  { title: "Coach Carter", year: 2005, genre: "Drama", format: "Live Action", studio: "Paramount", rating: "PG-13", cover: "" },
+  { title: "Crash", year: 2004, genre: "Drama", format: "Live Action", studio: "Lionsgate", rating: "R", cover: "" },
+  { title: "Crouching Tiger, Hidden Dragon", year: 2000, genre: "Action", format: "Live Action", studio: "Sony Pictures Classics", rating: "PG-13", cover: "" },
+  { title: "The Da Vinci Code", year: 2006, genre: "Thriller", format: "Live Action", studio: "Sony Pictures", rating: "PG-13", cover: "" },
+  { title: "Desperado", year: 1995, genre: "Action", format: "Live Action", studio: "Sony Pictures", rating: "R", cover: "" },
+  { title: "Dragon Wars", year: 2007, genre: "Fantasy", format: "Live Action", studio: "Freestyle Releasing", rating: "PG-13", cover: "" },
+  { title: "Dude, Where's My Car?", year: 2001, genre: "Comedy", format: "Live Action", studio: "20th Century Fox", rating: "PG-13", cover: "" },
+  { title: "Dumb and Dumber", year: 1994, genre: "Comedy", format: "Live Action", studio: "New Line Cinema", rating: "NR", cover: "" },
+  { title: "The Fifth Element", year: 1997, genre: "Sci-Fi", format: "Live Action", studio: "Sony Pictures", rating: "PG-13", cover: "" },
+  { title: "Final Fantasy VII: Advent Children", year: 2004, genre: "Anime", format: "Animation", studio: "Square Enix", rating: "PG-13", cover: "" },
+  { title: "Fun with Dick and Jane", year: 2005, genre: "Comedy", format: "Live Action", studio: "Sony Pictures", rating: "PG-13", cover: "" },
+  { title: "Ghost Rider", year: 2007, genre: "Action", format: "Live Action", studio: "Sony Pictures", rating: "PG-13", cover: "" },
+  { title: "The Girl Next Door", year: 2004, genre: "Comedy", format: "Live Action", studio: "20th Century Fox", rating: "NR", cover: "" },
+  { title: "Glory Road", year: 2006, genre: "Drama", format: "Live Action", studio: "Disney", rating: "PG", cover: "" },
+  { title: "Godsend", year: 2004, genre: "Thriller", format: "Live Action", studio: "Lionsgate", rating: "PG-13", cover: "" },
+  { title: "Grandma's Boy", year: 2006, genre: "Comedy", format: "Live Action", studio: "20th Century Fox", rating: "NR", cover: "" },
+  { title: "The Grudge", year: 2004, genre: "Horror", format: "Live Action", studio: "Sony Pictures", rating: "PG-13", cover: "" },
+  { title: "The Grudge 2", year: 2006, genre: "Horror", format: "Live Action", studio: "Sony Pictures", rating: "Unrated", cover: "" },
+  { title: "Harold & Kumar Go to White Castle", year: 2004, genre: "Comedy", format: "Live Action", studio: "New Line Cinema", rating: "NR", cover: "" },
+  { title: "Hellboy", year: 2004, genre: "Action", format: "Live Action", studio: "Sony Pictures", rating: "NR", cover: "" },
+  { title: "High Tension", year: 2005, genre: "Horror", format: "Live Action", studio: "Lionsgate", rating: "NR", cover: "" },
+  { title: "The Hills Have Eyes", year: 1977, genre: "Horror", format: "Live Action", studio: "20th Century Fox", rating: "R", cover: "" },
+  { title: "Hostel", year: 2006, genre: "Horror", format: "Live Action", studio: "Sony Pictures", rating: "NR", cover: "" },
+  { title: "House of the Dead", year: 2003, genre: "Horror", format: "Live Action", studio: "Lionsgate", rating: "R", cover: "" },
+  { title: "House of Wax", year: 2005, genre: "Horror", format: "Live Action", studio: "Warner Bros.", rating: "R", cover: "" },
+  { title: "Kill Bill: Vol. 1", year: 2003, genre: "Action", format: "Live Action", studio: "Miramax", rating: "R", cover: "" },
+  { title: "Kill Bill: Vol. 2", year: 2004, genre: "Action", format: "Live Action", studio: "Miramax", rating: "R", cover: "" },
+  { title: "Kung Fu Hustle", year: 2004, genre: "Comedy", format: "Live Action", studio: "Sony Pictures Classics", rating: "R", cover: "" },
+  { title: "Little Man", year: 2006, genre: "Comedy", format: "Live Action", studio: "Sony Pictures", rating: "PG-13", cover: "" },
+  { title: "Men in Black", year: 1997, genre: "Sci-Fi", format: "Live Action", studio: "Sony Pictures", rating: "PG-13", cover: "" },
+  { title: "Monster House", year: 2006, genre: "Family", format: "Animation", studio: "Sony Pictures", rating: "PG", cover: "" },
+  { title: "Near Dark", year: 1987, genre: "Horror", format: "Live Action", studio: "Lionsgate", rating: "R", cover: "" },
+  { title: "Ninja Scroll", year: 1993, genre: "Anime", format: "Animation", studio: "Manga Entertainment", rating: "NR", cover: "" },
+  { title: "Open Season", year: 2006, genre: "Family", format: "Animation", studio: "Sony Pictures", rating: "PG", cover: "" },
+  { title: "Open Water", year: 2003, genre: "Thriller", format: "Live Action", studio: "Lionsgate", rating: "R", cover: "" },
+  { title: "The Pink Panther", year: 2006, genre: "Comedy", format: "Live Action", studio: "Sony Pictures", rating: "PG", cover: "" },
+  { title: "The Punisher", year: 2004, genre: "Action", format: "Live Action", studio: "Lionsgate", rating: "R", cover: "" },
+  { title: "Red Eye", year: 2005, genre: "Thriller", format: "Live Action", studio: "DreamWorks", rating: "PG-13", cover: "" },
+  { title: "Rocky Balboa", year: 2006, genre: "Drama", format: "Live Action", studio: "MGM", rating: "PG", cover: "" },
+  { title: "RV", year: 2006, genre: "Comedy", format: "Live Action", studio: "Sony Pictures", rating: "PG", cover: "" },
+  { title: "Shaun of the Dead", year: 2004, genre: "Comedy", format: "Live Action", studio: "Universal", rating: "R", cover: "" },
+  { title: "Silent Hill", year: 2006, genre: "Horror", format: "Live Action", studio: "Sony Pictures", rating: "R", cover: "" },
+  { title: "Sin City", year: 2005, genre: "Crime", format: "Live Action", studio: "Dimension Films", rating: "R", cover: "" },
+  { title: "Snatch", year: 2000, genre: "Crime", format: "Live Action", studio: "Sony Pictures Classics", rating: "R", cover: "" },
+  { title: "The Toxic Avenger", year: 1985, genre: "Horror", format: "Live Action", studio: "Troma", rating: "NR", cover: "" },
+  { title: "Transporter 2", year: 2005, genre: "Action", format: "Live Action", studio: "20th Century Fox", rating: "PG-13", cover: "" },
+  { title: "Wedding Crashers", year: 2005, genre: "Comedy", format: "Live Action", studio: "New Line Cinema", rating: "R", cover: "" },
+  { title: "Without a Paddle", year: 2004, genre: "Comedy", format: "Live Action", studio: "Paramount", rating: "PG-13", cover: "" },
+  { title: "xXx: State of the Union", year: 2005, genre: "Action", format: "Live Action", studio: "Sony Pictures", rating: "PG-13", cover: "" }
+];
+
+// --- App logic below ---
+
+const OWNED_KEY = "umdOwnedCollection";
+const VIEW_KEY = "umdViewMode";
+
+function movieId(m) {
+  return `${m.title}-${m.year}`;
+}
+
+function getOwnedSet() {
+  const raw = localStorage.getItem(OWNED_KEY);
+  return new Set(raw ? JSON.parse(raw) : []);
+}
+
+function saveOwnedSet(set) {
+  localStorage.setItem(OWNED_KEY, JSON.stringify([...set]));
+}
+
+function toggleOwned(id) {
+  const owned = getOwnedSet();
+  if (owned.has(id)) {
+    owned.delete(id);
+  } else {
+    owned.add(id);
+  }
+  saveOwnedSet(owned);
+  applyFilters();
+}
+
+function getUnique(key) {
+  return [...new Set(movies.map(m => m[key]))].sort();
+}
+
+function populateFilters() {
+  const yearSelect = document.getElementById("yearFilter");
+  const studioSelect = document.getElementById("studioFilter");
+  const genreSelect = document.getElementById("genreFilter");
+
+  getUnique("year").sort((a, b) => b - a).forEach(year => {
+    const opt = document.createElement("option");
+    opt.value = year;
+    opt.textContent = year;
+    yearSelect.appendChild(opt);
+  });
+
+  getUnique("studio").forEach(studio => {
+    const opt = document.createElement("option");
+    opt.value = studio;
+    opt.textContent = studio;
+    studioSelect.appendChild(o
